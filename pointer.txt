@@ -1,0 +1,5 @@
+BenchmarkCall	2000000000	         1.76 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCall	2000000000	         1.41 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCall	2000000000	         1.32 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCall	2000000000	         1.31 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCall	2000000000	         1.33 ns/op	       0 B/op	       0 allocs/op

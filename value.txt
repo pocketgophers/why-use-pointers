@@ -1,0 +1,5 @@
+BenchmarkCall	     300	   5897295 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCall	     300	   5885174 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCall	     300	   6813394 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCall	     200	   6221224 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCall	     200	  13363987 ns/op	       0 B/op	       0 allocs/op

@@ -1,0 +1,5 @@
+BenchmarkCall	     100	  19299893 ns/op	 8003587 B/op	       1 allocs/op
+BenchmarkCall	     100	  18379742 ns/op	 8003587 B/op	       1 allocs/op
+BenchmarkCall	     100	  19078040 ns/op	 8003584 B/op	       1 allocs/op
+BenchmarkCall	     100	  18513125 ns/op	 8003587 B/op	       1 allocs/op
+BenchmarkCall	     100	  17425882 ns/op	 8003613 B/op	       1 allocs/op
