@@ -8,16 +8,23 @@
 {{mkdirAll .BuildDir}}
 {{cd .BuildDir}}
 {{runNoOutput "git" "init"}}
+{{runNoOutput "git config user.email nathan@pocketgophers.com"}}
 {{runNoOutput "git checkout -b" (.Now.Format "2006-01-02")}}
 {{copy "build-readme.md" .BuildDir "readme.md"}}
 {{copy "main.go" .BuildDir "main.go"}}
 -->
-<style>
-table {width: 100%}
-td {text-align:right}
-.left {text-align:left}
-</style>
-<p>So, you already know how to use pointers, but you don’t know why you should use them? Here are a few reasons to use pointers, with examples.</p>
+
+<p>If you are a new programmer or coming to Go from a language without pointers like Python, you might wonder just why you should use pointers. By knowing <em>why</em> pointers are used, you will also know <em>when</em> to use them.</p>
+
+<p>The main reasons to use pointers are:</p>
+
+<ul>
+	<li>To assign a variable from another function</li>
+	<li>To modify a variable from a member function</li>
+	<li>To manage copy on function call</li>
+</ul>
+
+<p>I demonstrate each of these reasons with working code.</p>
 
 <p>First, a warning:</p>
 
