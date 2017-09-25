@@ -14,7 +14,7 @@ func (mt *myType) resetPtr() {
 	mt.value = 0
 }
 
-func memberFunction() {
+func main() {
 	mt := myType{
 		value: 1,
 	}

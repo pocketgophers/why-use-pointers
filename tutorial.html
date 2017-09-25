@@ -1,0 +1,126 @@
+{{version}}
+<!--
+{{removeAll .SiteDir}}
+{{mkdirAll .SiteDir}}
+{{copy "info.toml" .SiteDir "info.toml"}}
+
+{{removeAll .BuildDir}}
+{{mkdirAll .BuildDir}}
+{{cd .BuildDir}}
+{{runNoOutput "git" "init"}}
+{{runNoOutput "git checkout -b" (.Now.Format "2006-01-02")}}
+{{copy "build-readme.md" .BuildDir "readme.md"}}
+{{copy "main.go" .BuildDir "main.go"}}
+-->
+<style>
+table {width: 100%}
+td {text-align:right}
+.left {text-align:left}
+</style>
+<p>So, you already know how to use pointers, but you don’t know why you should use them? Here are a few reasons to use pointers, with examples.</p>
+
+<p>First, a warning:</p>
+
+<blockquote>
+Be mindful that passing pointers around can cause unintended and difficult to detect problems, for exactly the reason stated: the value of the underlying structure can be changed by any function that holds a reference to the pointer. It is generally safer to pass variables by value rather by reference, unless mandated by an interface, or when memory optimization is necessary. <div style="text-align: right"> – <a href="https://www.reddit.com/r/learngolang/comments/5olk0p/need_help_grokking_the_use_of_pointers_in_golang/dclttdb/">/u/kor_the_fiend</a></div>
+</blockquote>
+
+<p>The code for these examples can be obtained with:</p>
+
+<pre><code>go get -d pocketgophers.com/why-use-pointers</code></pre>
+
+<h2>Assign a variable from another function</h2>
+
+<p>Pointers can be used to set a variable from anther function, such as is done by <a href="https://godoc.org/encoding/json#Unmarshal">json.Unmarshal</a> and the <a href="https://godoc.org/flag">flag</a> package.</p>
+
+<p>Attempting to reset the local variable <code>value</code> from another function demonstrates how this works:</p>
+
+{{copy "another_function.go" .BuildDir "another_function.go"}}
+{{file "another_function.go"}}
+
+<p>Outputs:</p>
+
+{{run "go run another_function.go"}}
+
+<p>Notice that only <code>resetPtr</code> changes <code>value</code> in <code>main</code>.</p>
+
+<h2>Modify a variable from a member function</h2>
+
+<p>The follows from the previous example. The only differences are that the function is a member function and the value changed is <code>myType.value</code>.</p>
+
+{{copy "member_function.go" .BuildDir "member_function.go"}}
+{{file "member_function.go"}}
+
+<p>Outputs:</p>
+
+{{run "go run member_function.go"}}
+
+<p>Again, only <code>resetPtr</code> changes <code>value</code> in <code>main</code>.</p>
+
+<h2>Manage copy on function call</h2>
+
+<aside>NOTE: This is an optimization strategy. Only use it after profiling shows that you need to.</aside>
+
+<p>All functions calls are pass by value. </p>
+
+<blockquote>
+… the parameters of the call are passed by value to the function and the called function begins execution. The return parameters of the function are passed by value back to the calling function when the function returns. <div style="text-align:right">– <a href="https://golang.org/ref/spec#Calls">Go Specification: Calls</a></div>
+</blockquote>
+
+<p>What this means in practice is that if a variable is passed to a function, the function will work on a copy of the value of the variable. As a result, the function cannot change the original variable. If the passed value is a pointer, the function can change the value pointed at, but not the variable that was passed in.</p>
+
+<p>Other than controlling access, these copies use memory. This is only a problem when the value being copied is large. To show the effects of this, I will build an example that <a href="/exploring-alternatives-with-go-run">explores alternatives with <code>go run</code></a>. The first thing we need is a large value:</p>
+
+{{copy "main.go" .BuildDir "main.go"}}
+{{declFrom "main.go" "BigStruct"}}
+
+<p>The alternatives need to create an instance of <code>BigStruct</code> or <code>*BigStruct</code> and have a function that can be called using the same type. Here is the alternative for <code>BigStruct</code>:</p>
+
+{{copy "value.go" .BuildDir "value.go"}}
+{{file "value.go"}}
+
+<p>I use benchmarks to make the comparisons:</p>
+
+{{file "main.go"}}
+
+<p>The alternative for <code>*BigStruct</code> is:</p>
+
+{{copy "pointer.go" .BuildDir "pointer.go"}}
+{{file "pointer.go"}}
+
+<p>With these two alternatives, we can run them and compare the results with <a href="https://godoc.org/golang.org/x/perf/cmd/benchstat">benchstat</a>, which tells us if the differences are significant:</p>
+
+{{run "go run main.go value.go > value.txt"}}
+{{run "go run main.go pointer.go > pointer.txt"}}
+
+{{benchstat "value.txt" "pointer.txt"}}
+
+<p>The delta column shows the difference between the two benchmarks. A delta of ~ means there is no significant difference. Negative numbers mean the second alternative is better. Positive numbers mean the second alternative is worse. (Assuming you are trying to minimize the values.)</p>
+
+<p>In this case we can see the pointer version is 100% faster (time/op, op means operation). There is no significant difference in how much memory (alloc/op) or how many allocations are made (allocs/op).</p>
+
+<p>Although no memory is allocated, there is a significant difference in time. The time difference can be attributed to copying <code>b</code> from the calling function’s stack to the called function’s stack.</p>
+
+<p>To get the memory difference to show up in the memory and allocation results, the escape analyzer needs to move <code>b</code> from the stack to the heap. I forced this by accessing <code>b</code> from a goroutine:</p>
+
+{{copy "value-escapes.go" .BuildDir "value-escapes.go"}}
+{{file "value-escapes.go"}}
+
+<p>You can find out what escapes with <code>-gcflags=-m</code>:</p>
+
+{{run "go build -gcflags=-m main.go value-escapes.go"}}
+<!-- {{run "rm main"}} -->
+
+<p>I used <code>go build</code> here to avoid running the code. As desired, <code>b</code> escapes. This alternative shows:</p>
+
+{{run "go run main.go value-escapes.go > value-escapes.txt"}}
+
+{{benchstat "value-escapes.txt" "pointer.txt"}}
+
+<p>Now the difference in memory use is clear. Passing a pointer uses less memory and is faster than passing <code>BigStruct</code> directly.</p>
+
+<p>I forced <code>b</code> to escape so the memory use would appear in the benchmark. Normally this is something that <em>should not</em> be done as memory allocated in the heap needs to be garbage collected. Memory that stays in the stack will be freed when the function returns and its stack is freed. Notice how forcing <code>b</code> to escape reduces performance:</p>
+
+{{benchstat "value.txt" "value-escapes.txt"}}
+
+{{commit "initial"}}

@@ -10,7 +10,7 @@ func resetPtr(value *int) {
 	*value = 0
 }
 
-func assignVariable() {
+func main() {
 	value := 1
 	fmt.Println("initial", value)
 

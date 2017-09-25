@@ -1,19 +1,5 @@
-Example code for https://pocketgophers.com/why-use-pointers
+This is the source used to build https://pocketgophers.com/why-use-pointers
 
-Get the code with:
+The code associated with a specific build is in a dated branch, the latest version of which is the default branch.
 
-```
-go get -d pocketgophers.com/why-use-pointers
-```
-
-Examples can be ran with:
-
-```
-go build && ./why-pointers
-```
-
-Benchmarks with:
-
-```
-go test -bench . -benchmem
-```
+The tool used to build this tutorial has not yet been released.
